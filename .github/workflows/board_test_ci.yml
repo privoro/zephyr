@@ -72,8 +72,8 @@ jobs:
         source zephyr-env.sh
     - name: update dependencies
       run: |
-        cd ~/zephyrproject/zephyr
-        pip install -r requirements
+        cd ~/zephyrproject/zephyr/scripts
+        pip install -r requirements.txt
     - name: build qemu_cortex_m0
       run: |
         cd ~/zephyrproject/zephyr
