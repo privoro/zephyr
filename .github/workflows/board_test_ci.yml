@@ -29,22 +29,22 @@ jobs:
       run: |
         pip3 install pytest west pyelftools
     - name: install  multi-purpose west tool
-      run: apt install --no-install-recommends git cmake ninja-build gperf
+      run: sudo apt install --no-install-recommends git cmake ninja-build gperf
       shell: bash
     - name : install tool2
-      run : apt install ccache dfu-util device-tree-compiler wget
+      run : sudo apt install ccache dfu-util device-tree-compiler wget
       shell: bash
     - name : install tool3
-      run: apt install python3-pip python3-setuptools python3-tk python3-wheel xz-utils file
+      run: sudo apt install python3-pip python3-setuptools python3-tk python3-wheel xz-utils file
       shell : bash
     - name : install tool4
-      run: apt install make gcc gcc-multilib g++-multilib libsdl2-dev
+      run: sudo apt install make gcc gcc-multilib g++-multilib libsdl2-dev
       shell: bash
     - name: install cmake
       run : |
         wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-        apt update
-        apt install cmake
+        sudo apt update
+        sudo apt install cmake
     - name: install west
       run: |
         pip3 install --user -U west
