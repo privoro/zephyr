@@ -1,0 +1,84 @@
+name: build Zephyr on QEMU
+
+env:
+  ZEPHYR_TOOLCHAIN_VARIANT: zephyr
+  ZEPHYR_SDK_INSTALL_DIR: ~/zephyr-sdk-0.11.1
+
+on:
+  schedule:
+    - cron:  '0 * * * *'
+
+jobs:
+  prepare_env:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: Set up Python 
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: cache-pip-linux
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ubuntu-latest-pip-3.7
+        restore-keys: |
+          ubuntu-latest-pip-3.7
+    - name: install pytest
+      run: |
+        pip3 install pytest west pyelftools
+    - name: install  multi-purpose west tool
+      run: apt install --no-install-recommends git cmake ninja-build gperf
+      shell: bash
+    - name : install tool2
+      run : apt install ccache dfu-util device-tree-compiler wget
+      shell: bash
+    - name : install tool3
+      run: apt install python3-pip python3-setuptools python3-tk python3-wheel xz-utils file
+      shell : bash
+    - name : install tool4
+      run: apt install make gcc gcc-multilib g++-multilib libsdl2-dev
+      shell: bash
+    - name: install cmake
+      run : |
+        wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
+        apt update
+        apt install cmake
+    - name: install west
+      run: |
+        pip3 install --user -U west
+        echo 'export PATH=~/.local/bin:"$PATH"' >> ~/.bashrc
+        source ~/.bashrc
+    - name : install tool chain
+      run : |
+        wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.1/zephyr-sdk-0.11.1-setup.run
+        chmod +x zephyr-sdk-0.11.1-setup.run
+        ./zephyr-sdk-0.11.1-setup.run -- -d ~/zephyr-sdk-0.11.1
+  build:
+
+    runs-on: ubuntu-18.04
+    
+    steps:
+      - name:  update west
+        run: |
+          source ~/.bashrc
+          cd ~
+          west init zephyrproject
+          cd zephyrproject
+          west update
+        shell: bash
+      - name: source env
+        run: |
+          cd ~/zephyrproject/zephyr
+          source zephyr-env.sh
+      - name: build qemu_cortex_m0
+        run: |
+          scripts/sanitycheck  --device-testing -p qemu_cortex_m0
+      - name: build qemu_cortex_a53
+        run: | 
+          scripts/sanitycheck  --device-testing -p qemu_cortex_a53
+      - name: build qemu_cortex_m3
+        run: | 
+          scripts/sanitycheck  --device-testing -p qemu_cortex_m3
+
