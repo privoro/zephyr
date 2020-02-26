@@ -38,7 +38,7 @@ jobs:
       run: apt install python3-pip python3-setuptools python3-tk python3-wheel xz-utils file
       shell : bash
     - name : install tool4
-      run: apt install make gcc gcc-multilib g++-multilib libsdl2-dev
+      run: apt install make gcc gcc-multilib g++-multilib libsdl2-dev tabulate
       shell: bash
     - name: install cmake
       run : |
@@ -72,13 +72,20 @@ jobs:
         run: |
           cd ~/zephyrproject/zephyr
           source zephyr-env.sh
+      - name: update dependencies
+        run: |
+          cd ~/zephyrproject/zephyr
+          pip install -r requirements
       - name: build qemu_cortex_m0
         run: |
+          cd ~/zephyrproject/zephyr
           scripts/sanitycheck  --device-testing -p qemu_cortex_m0
       - name: build qemu_cortex_a53
-        run: | 
+        run: |
+          cd ~/zephyrproject/zephyr 
           scripts/sanitycheck  --device-testing -p qemu_cortex_a53
       - name: build qemu_cortex_m3
         run: | 
+          cd ~/zephyrproject/zephyr
           scripts/sanitycheck  --device-testing -p qemu_cortex_m3
 
