@@ -58,10 +58,9 @@ jobs:
     - name : install tabulate
       run: |
         pip install tabulate
-  build:
-
+  build_m0:
+    needs: prepare_env
     runs-on: ubuntu-18.04
-    
     steps:
       - name:  update west
         run: |
@@ -87,8 +86,53 @@ jobs:
         run: |
           cd ~/zephyrproject/zephyr 
           scripts/sanitycheck  --device-testing -p qemu_cortex_a53
+  build_m3:
+    needs: prepare_env
+    runs-on: ubuntu-18.04
+    steps:
+      - name:  update west
+        run: |
+          source ~/.bashrc
+          cd ~
+          west init zephyrproject
+          cd zephyrproject
+          west update
+        shell: bash
+      - name: source env
+        run: |
+          cd ~/zephyrproject/zephyr
+          source zephyr-env.sh
+      - name: update dependencies
+        run: |
+          cd ~/zephyrproject/zephyr
+          pip install -r requirements
       - name: build qemu_cortex_m3
         run: | 
           cd ~/zephyrproject/zephyr
           scripts/sanitycheck  --device-testing -p qemu_cortex_m3
+  build_a53:
+    needs: prepare_env
+    runs-on: ubuntu-18.04
+    steps:
+      - name:  update west
+        run: |
+          source ~/.bashrc
+          cd ~
+          west init zephyrproject
+          cd zephyrproject
+          west update
+        shell: bash
+      - name: source env
+        run: |
+          cd ~/zephyrproject/zephyr
+          source zephyr-env.sh
+      - name: update dependencies
+        run: |
+          cd ~/zephyrproject/zephyr
+          pip install -r requirements
+      - name: build qemu_cortex_a53
+        run: |
+          cd ~/zephyrproject/zephyr 
+          scripts/sanitycheck  --device-testing -p qemu_cortex_a53
+
 
