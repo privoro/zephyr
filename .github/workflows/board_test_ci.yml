@@ -65,7 +65,7 @@ jobs:
         west init zephyrproject
         cd zephyrproject
         west update
-        shell: bash
+      shell: bash
     - name: source env
       run: |
         cd ~/zephyrproject/zephyr
