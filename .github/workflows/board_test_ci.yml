@@ -66,10 +66,6 @@ jobs:
         cd zephyrproject
         west update
       shell: bash
-    - name: source env
-      run: |
-        cd ~/zephyrproject/zephyr
-        source zephyr-env.sh
     - name: update dependencies
       run: |
         cd ~/zephyrproject/zephyr/scripts
@@ -77,14 +73,17 @@ jobs:
     - name: build qemu_cortex_m0
       run: |
         cd ~/zephyrproject/zephyr
+        source zephyr-env.sh
         scripts/sanitycheck  --device-testing -p qemu_cortex_m0
     - name: build qemu_cortex_m3
       run: | 
         cd ~/zephyrproject/zephyr
+        source zephyr-env.sh
         scripts/sanitycheck  --device-testing -p qemu_cortex_m3
     - name: build qemu_cortex_a53
       run: |
-        cd ~/zephyrproject/zephyr 
+        cd ~/zephyrproject/zephyr
+        source zephyr-env.sh
         scripts/sanitycheck  --device-testing -p qemu_cortex_a53
 
 
