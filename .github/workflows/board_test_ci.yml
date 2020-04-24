@@ -1,3 +1,5 @@
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 name: build Zephyr on QEMU
 
 env:
@@ -9,7 +11,7 @@ on:
     - cron:  '0 * * * *'
 
 jobs:
-  prepare_env:
+  build:
     runs-on: ubuntu-18.04
     steps:
     - name: checkout
@@ -29,7 +31,9 @@ jobs:
       run: |
         pip3 install pytest west pyelftools
     - name: install  multi-purpose west tool
-      run: sudo apt install --no-install-recommends git cmake ninja-build gperf
+      run: |
+        sudo apt update
+        sudo apt install --no-install-recommends git cmake ninja-build gperf
       shell: bash
     - name : install tool2
       run : sudo apt install ccache dfu-util device-tree-compiler wget
@@ -38,7 +42,9 @@ jobs:
       run: sudo apt install python3-pip python3-setuptools python3-tk python3-wheel xz-utils file
       shell : bash
     - name : install tool4
-      run: sudo apt install make gcc gcc-multilib g++-multilib libsdl2-dev
+      run: |
+        sudo apt autoremove 
+        sudo apt install --fix-missing make gcc gcc-multilib g++-multilib libsdl2-dev
       shell: bash
     - name: install cmake
       run : |
@@ -55,6 +61,7 @@ jobs:
         wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.1/zephyr-sdk-0.11.1-setup.run
         chmod +x zephyr-sdk-0.11.1-setup.run
         ./zephyr-sdk-0.11.1-setup.run -- -d ~/zephyr-sdk-0.11.1
+        rm -f ./zephyr-sdk-0.11.1-setup.run
     - name : install tabulate
       run: |
         pip install tabulate
@@ -65,11 +72,23 @@ jobs:
         west init zephyrproject
         cd zephyrproject
         west update
+        cd zephyr
+        echo $GITHUB_WORKSPACE
+        ls $GITHUB_WORKSPACE
+        git log --format="%H" -n 1 > $GITHUB_WORKSPACE/SHA_zephyr_master.txt
       shell: bash
     - name: update dependencies
       run: |
         cd ~/zephyrproject/zephyr/scripts
         pip install -r requirements.txt
+    - name: free disk space
+      run: |
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt clean
+        docker rmi $(docker image ls -aq)
+        df -h
+        date
     - name: build qemu_cortex_m0
       run: |
         cd ~/zephyrproject/zephyr
