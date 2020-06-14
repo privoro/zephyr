@@ -66,9 +66,14 @@ static const char * const devices[] = {
 	LABELS_FOR_DT_COMPAT(microchip_xec_timer)
 	LABELS_FOR_DT_COMPAT(nxp_imx_epit)
 	LABELS_FOR_DT_COMPAT(nxp_imx_gpt)
+#if CONFIG_COUNTER_MCUX_RTC
 	LABELS_FOR_DT_COMPAT(nxp_kinetis_rtc)
+#endif
 	LABELS_FOR_DT_COMPAT(silabs_gecko_rtcc)
 	LABELS_FOR_DT_COMPAT(st_stm32_rtc)
+#if CONFIG_COUNTER_MCUX_PIT
+	LABELS_FOR_DT_COMPAT(nxp_kinetis_pit)
+#endif
 };
 
 typedef void (*counter_test_func_t)(const char *dev_name);
