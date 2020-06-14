@@ -17,3 +17,4 @@ zephyr_library_sources_ifdef(CONFIG_COUNTER_XEC                 counter_mchp_xec
 zephyr_library_sources_ifdef(CONFIG_COUNTER_MCUX_LPTMR          counter_mcux_lptmr.c)
 zephyr_library_sources_ifdef(CONFIG_COUNTER_MAXIM_DS3231        maxim_ds3231.c)
 zephyr_library_sources_ifdef(CONFIG_USERSPACE                   counter_handlers.c)
+zephyr_library_sources_ifdef(CONFIG_COUNTER_MCUX_PIT            counter_mcux_pit.c)
