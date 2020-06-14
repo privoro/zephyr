@@ -14,7 +14,7 @@
 #include <string.h>
 
 /* in millisecond */
-#define SLEEPTIME 1000
+#define SLEEPTIME 100
 
 #define TRANSFER_LOOPS (5)
 #define RX_BUFF_SIZE (64)
@@ -27,14 +27,15 @@ static __aligned(16) char rx_data[TRANSFER_LOOPS][RX_BUFF_SIZE] __used
 	__attribute__((__section__(".nocache.dma")));
 #else
 /* pad to times of 8*/
-static const char tx_data[] =
-	"The quick brown fox jumps over the lazy dog ....";
+static const __aligned(16) char tx_data[] =
+	"The quick brown fox jumps over the lazy dog";
 static __aligned(16) char rx_data[TRANSFER_LOOPS][RX_BUFF_SIZE] = { { 0 } };
 #endif
 
 #define DMA_DEVICE_NAME "DMA_0"
 
 volatile u8_t transfer_count;
+volatile u8_t transfer_done = 0;
 static struct dma_config dma_cfg = { 0 };
 static struct dma_block_config dma_block_cfg = { 0 };
 
@@ -42,6 +43,7 @@ static void test_transfer(struct device *dev, u32_t id)
 {
 	int ret;
 	transfer_count++;
+#if 1
 	if (transfer_count < TRANSFER_LOOPS) {
 		dma_block_cfg.block_size = sizeof(tx_data);
 		dma_block_cfg.source_address = (u32_t)tx_data;
@@ -49,9 +51,11 @@ static void test_transfer(struct device *dev, u32_t id)
 
 		ret = dma_config(dev, id, &dma_cfg);
 		if (ret == 0) {
-			dma_start(dev, id);
+        		transfer_done = 1;
+			    //dma_start(dev, id);
 		}
 	}
+#endif
 }
 
 static void test_error(void)
@@ -124,8 +128,16 @@ void main(void)
 		return;
 	}
 
-	k_sleep(K_MSEC(SLEEPTIME));
-
+	//k_sleep(K_MSEC(SLEEPTIME));
+#if 1
+        while (transfer_count < TRANSFER_LOOPS) {
+             if (transfer_done) {
+        	dma_start(dma, chan_id);
+                transfer_done = 0;
+             }
+	     k_sleep(K_MSEC(SLEEPTIME));
+	}
+#endif
 	if (transfer_count < TRANSFER_LOOPS) {
 		transfer_count = TRANSFER_LOOPS;
 		printk("ERROR: unfinished transfer\n");

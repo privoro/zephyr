@@ -12,7 +12,7 @@ properties:
       required: true
 
     interrupts:
-      required: true
+      required: true 
 
     "#io-channel-cells":
       const: 1

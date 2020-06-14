@@ -47,4 +47,27 @@ config ADC_MCUX_ADC16_VREF_ALTERNATE
 
 endchoice
 
+config ADC_EDMA_CHANNEL
+	int "ADC DMA Channel select"
+	depends on HAS_MCUX_EDMA
+	default 0
+	help
+	  ADC DMA Channel select (0-4) PIT triggerred
+
+config ADC_HW_TRIGGER
+	bool "ADC HW TRIGGER"
+	default true
+	help
+	  Support HW Trigger ADC
+
+if ADC_HW_TRIGGER
+
+config ADC_HW_TRIGGER_CHANNEL
+	int "HW trigger ADC channel"
+	default 4
+	help
+	  hw channel id as trigger source default PIT0
+
+endif # ADC_PIT_TRIGGER
+
 endif # ADC_MCUX_ADC16

@@ -20,8 +20,8 @@ config DMA_TCD_QUEUE_SIZE
 
 config DMA_MCUX_TEST_SLOT_START
 	int "test slot start num"
-	depends on SOC_SERIES_KINETIS_K6X
-	default 58
+	depends on SOC_SERIES_KINETIS_K6X || SOC_SERIES_KINETIS_K8X
+	default 60
 	help
 	  test slot start num
 

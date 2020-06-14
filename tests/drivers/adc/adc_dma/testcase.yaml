@@ -1,0 +1,6 @@
+common:
+  tags: adc dma trigger
+tests:
+  drivers.adc-dma:
+    depends_on: adc && dma && pit
+    platform_whitelist: frdm_k82f

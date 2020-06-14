@@ -60,6 +60,9 @@ struct dma_mcux_edma_data {
 #define DEV_EDMA_HANDLE(dev, ch)                                               \
 	((edma_handle_t *)(&(DEV_CHANNEL_DATA(dev, ch)->edma_handle)))
 
+static int dma_mcux_edma_get_status(struct device *dev, u32_t channel,
+				    struct dma_status *status);
+
 static void nxp_edma_callback(edma_handle_t *handle, void *param,
 			      bool transferDone, u32_t tcds)
 {
@@ -169,11 +172,13 @@ static void dma_mcux_edma_error_irq_handler(void *arg)
 	int i = 0;
 	u32_t flag = 0;
 	struct device *dev = (struct device *)arg;
-
+        struct dma_status status;
 	for (i = 0; i < DT_INST_PROP(0, dma_channels); i++) {
 		if (DEV_CHANNEL_DATA(dev, i)->busy) {
 			flag = EDMA_GetChannelStatusFlags(DEV_BASE(dev), i);
 			LOG_INF("channel %d error status is 0x%x", i, flag);
+			LOG_INF("DMA ES 0x%x", DEV_BASE(dev)->ES);
+			dma_mcux_edma_get_status(dev, i, &status);
 			EDMA_ClearChannelStatusFlags(DEV_BASE(dev), i,
 						     0xFFFFFFFF);
 			EDMA_AbortTransfer(DEV_EDMA_HANDLE(dev, i));
@@ -331,6 +336,10 @@ static int dma_mcux_edma_configure(struct device *dev, u32_t channel,
 		data->dma_callback = config->dma_callback;
 	}
 
+#if defined(FSL_FEATURE_EDMA_ASYNCHRO_REQUEST_CHANNEL_COUNT) && FSL_FEATURE_EDMA_ASYNCHRO_REQUEST_CHANNEL_COUNT
+    EDMA_EnableAsyncRequest(DEV_BASE(dev), channel, true);
+#endif
+
 	irq_unlock(key);
 
 	return 0;
@@ -345,6 +354,7 @@ static int dma_mcux_edma_start(struct device *dev, u32_t channel)
 	LOG_DBG("DMA CR 0x%x", DEV_BASE(dev)->CR);
 	data->busy = true;
 	EDMA_StartTransfer(DEV_EDMA_HANDLE(dev, channel));
+	LOG_DBG("DMA handler");
 	return 0;
 }
 
@@ -389,15 +399,25 @@ static int dma_mcux_edma_get_status(struct device *dev, u32_t channel,
 		status->pending_length = 0;
 	}
 	status->dir = DEV_CHANNEL_DATA(dev, channel)->dir;
-	LOG_DBG("DMAMUX CHCFG 0x%x", DEV_DMAMUX_BASE(dev)->CHCFG[channel]);
-	LOG_DBG("DMA CR 0x%x", DEV_BASE(dev)->CR);
-	LOG_DBG("DMA INT 0x%x", DEV_BASE(dev)->INT);
-	LOG_DBG("DMA ERQ 0x%x", DEV_BASE(dev)->ERQ);
-	LOG_DBG("DMA ES 0x%x", DEV_BASE(dev)->ES);
-	LOG_DBG("DMA ERR 0x%x", DEV_BASE(dev)->ERR);
-	LOG_DBG("DMA HRS 0x%x", DEV_BASE(dev)->HRS);
+	LOG_INF("DMAMUX CHCFG 0x%x", DEV_DMAMUX_BASE(dev)->CHCFG[channel]);
+	LOG_INF("DMA CR 0x%x", DEV_BASE(dev)->CR);
+	LOG_INF("DMA INT 0x%x", DEV_BASE(dev)->INT);
+	LOG_INF("DMA ERQ 0x%x", DEV_BASE(dev)->ERQ);
+	LOG_INF("DMA ES 0x%x", DEV_BASE(dev)->ES);
+	LOG_INF("DMA ERR 0x%x", DEV_BASE(dev)->ERR);
+	LOG_INF("DMA HRS 0x%x", DEV_BASE(dev)->HRS);
 	tcdRegs = (edma_tcd_t *)((uint32_t)&DEV_BASE(dev)->TCD[channel]);
-	LOG_DBG("data csr is 0x%x", tcdRegs->CSR);
+	LOG_INF("data saddr is 0x%x", tcdRegs->SADDR);
+	LOG_INF("data soff is 0x%x", tcdRegs->SOFF);
+	LOG_INF("data attr is 0x%x", tcdRegs->ATTR);
+	LOG_INF("data nbytes is 0x%x", tcdRegs->NBYTES);
+	LOG_INF("data slast is 0x%x", tcdRegs->SLAST);
+	LOG_INF("data daddr is 0x%x", tcdRegs->DADDR);
+	LOG_INF("data doff is 0x%x", tcdRegs->DOFF);
+	LOG_INF("data citer is 0x%x", tcdRegs->CITER);
+	LOG_INF("data sga is 0x%x", tcdRegs->DLAST_SGA);
+	LOG_INF("data csr is 0x%x", tcdRegs->CSR);
+	LOG_INF("data biter is 0x%x", tcdRegs->BITER);
 	return 0;
 }
 
