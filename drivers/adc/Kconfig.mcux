@@ -68,6 +68,6 @@ config ADC_HW_TRIGGER_CHANNEL
 	help
 	  hw channel id as trigger source default PIT0
 
-endif # ADC_PIT_TRIGGER
+endif # ADC_HW_TRIGGER
 
 endif # ADC_MCUX_ADC16

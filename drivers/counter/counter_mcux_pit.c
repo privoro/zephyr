@@ -188,17 +188,21 @@ DEVICE_AND_API_INIT(mcux_pit_0, DT_INST_LABEL(0), &mcux_pit_init,
 
 static void mcux_pit_irq_config_0(struct device *dev)
 {
-	IRQ_CONNECT(DT_INST_IRQN(0), DT_INST_IRQ(0, priority), mcux_pit_isr,
-		    DEVICE_GET(mcux_pit_0), 0);
-	irq_enable(DT_INST_IRQN(0));
-	IRQ_CONNECT(DT_INST_IRQN(1), DT_INST_IRQ(1, priority), mcux_pit_isr,
-		    DEVICE_GET(mcux_pit_0), 0);
-	irq_enable(DT_INST_IRQN(1));
-	IRQ_CONNECT(DT_INST_IRQN(2), DT_INST_IRQ(2, priority), mcux_pit_isr,
-		    DEVICE_GET(mcux_pit_0), 0);
-	irq_enable(DT_INST_IRQN(2));
-	IRQ_CONNECT(DT_INST_IRQN(3), DT_INST_IRQ(3, priority), mcux_pit_isr,
-		    DEVICE_GET(mcux_pit_0), 0);
-	irq_enable(DT_INST_IRQN(3));
+	IRQ_CONNECT(DT_INST_IRQ_BY_IDX(0, 0, irq),
+				DT_INST_IRQ_BY_IDX(0, 0, priority),
+				mcux_pit_isr, DEVICE_GET(mcux_pit_0), 0);
+	irq_enable(DT_INST_IRQ_BY_IDX(0, 0, irq));
+	IRQ_CONNECT(DT_INST_IRQ_BY_IDX(0, 1, irq),
+				DT_INST_IRQ_BY_IDX(0, 1, priority),
+				mcux_pit_isr, DEVICE_GET(mcux_pit_0), 0);
+	irq_enable(DT_INST_IRQ_BY_IDX(0, 1, irq));
+	IRQ_CONNECT(DT_INST_IRQ_BY_IDX(0, 2, irq),
+				DT_INST_IRQ_BY_IDX(0, 2, priority),
+				mcux_pit_isr, DEVICE_GET(mcux_pit_0), 0);
+	irq_enable(DT_INST_IRQ_BY_IDX(0, 2, irq));
+	IRQ_CONNECT(DT_INST_IRQ_BY_IDX(0, 3, irq),
+				DT_INST_IRQ_BY_IDX(0, 3, priority),
+				mcux_pit_isr, DEVICE_GET(mcux_pit_0), 0);
+	irq_enable(DT_INST_IRQ_BY_IDX(0, 3, irq));
 }
 #endif /* DT_NODE_HAS_STATUS(DT_DRV_INST(0), okay) */
