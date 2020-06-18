@@ -25,12 +25,14 @@
 #define ADC_REFERENCE		ADC_REF_INTERNAL
 #define ADC_ACQUISITION_TIME	ADC_ACQ_TIME_DEFAULT
 #define ADC_1ST_CHANNEL_ID	26
-#define HW_TRIGGER_INTERVAL (5000U)
+#define HW_TRIGGER_INTERVAL (50U)
 /* for DMA HW trigger interval need large than HW trigger interval*/
 #define SAMPLE_INTERVAL_US  (10000U)     
 
-#define BUFFER_SIZE  256
+#define BUFFER_SIZE  8
 static ZTEST_BMEM s32_t m_sample_buffer[BUFFER_SIZE];
+static ZTEST_BMEM s32_t m_sample_buffer2[2][BUFFER_SIZE];
+int    current_buf_inx = 0;
 
 static const struct adc_channel_cfg m_1st_channel_cfg = {
 	.gain             = ADC_GAIN,
@@ -80,8 +82,8 @@ static void init_pit(void)
 				 dev_name);
 	
 	counter_start(dev);
-	/*pit interval in 5ms sample 256 time, so the total convert rate is 51.2k*/
-	top_cfg.ticks = counter_us_to_ticks(dev, 5000);
+	/*pit interval in 50us sample 256 time, so the total convert rate is 51.2k*/
+	top_cfg.ticks = counter_us_to_ticks(dev, HW_TRIGGER_INTERVAL);
 	err = counter_set_top_value(dev, &top_cfg);
 	zassert_equal(0, err, "%s: Counter failed to set top value (err: %d)",
 			dev_name, err);
@@ -140,6 +142,26 @@ static void check_samples(int expected_count)
 	#endif
 	TC_PRINT("%d sampled\n", BUFFER_SIZE);
 }
+
+static void check_samples2(int expected_count)
+{
+	int i;
+
+	TC_PRINT("Samples read: ");
+	#if 1
+	for (i = 0; i < BUFFER_SIZE; i++) {
+		s16_t sample_value = m_sample_buffer2[current_buf_inx][i];
+
+		TC_PRINT("0x%04x ", sample_value);
+		if (i && i%10 == 0)
+		{
+			TC_PRINT("\n");
+		}
+	}
+	#endif
+	TC_PRINT("%d sampled\n", BUFFER_SIZE);
+}
+
 
 /*
  * test_adc_sample_one_channel
@@ -272,23 +294,32 @@ static enum adc_action sample_with_interval_callback(
 				const struct adc_sequence *sequence,
 				u16_t sampling_index)
 {
-	TC_PRINT("%s: sampling %d\n", __func__, sampling_index);
+	struct adc_sequence *seq = sequence;
+	int _inx = current_buf_inx;
+	//TC_PRINT("%s: sampling %d\n", __func__, sampling_index);
+	//TC_PRINT("%s: buffer %d\n", __func__, current_buf_inx);
+        memcpy(m_sample_buffer, m_sample_buffer2[_inx], sizeof(m_sample_buffer));
+        current_buf_inx = (current_buf_inx == 0)? 1: 0;
+        seq->buffer = m_sample_buffer2[current_buf_inx];
 	return ADC_ACTION_CONTINUE;
 }
 
 static int test_task_with_interval(void)
 {
 	int ret;
+        s64_t time_stamp;
+        s64_t milliseconds_spent;
+
 	const struct adc_sequence_options options = {
-		.interval_us     = 100 * 1000UL,
+		.interval_us     = 5000UL, /*make this the same as the sample time*/
 		.callback        = sample_with_interval_callback,
-		.extra_samplings = 4,
+		.extra_samplings = 1,
 	};
 	const struct adc_sequence sequence = {
 		.options     = &options,
 		.channels    = BIT(ADC_1ST_CHANNEL_ID),
-		.buffer      = m_sample_buffer,
-		.buffer_size = sizeof(m_sample_buffer),
+		.buffer      = m_sample_buffer2[0],
+		.buffer_size = sizeof(m_sample_buffer2[0]),
 		.resolution  = ADC_RESOLUTION,
 	};
 
@@ -297,12 +328,15 @@ static int test_task_with_interval(void)
 	if (!adc_dev) {
 		return TC_FAIL;
 	}
-
+	int count = 100;
+	while(count--){
+        time_stamp = k_uptime_get();
 	ret = adc_read(adc_dev, &sequence);
+	milliseconds_spent = k_uptime_delta(&time_stamp);
+	printk("now spend = %lldms\n", milliseconds_spent);        
 	zassert_equal(ret, 0, "adc_read() failed with code %d", ret);
-
-	check_samples(1 + options.extra_samplings);
-
+	}
+	check_samples2(1 + options.extra_samplings);
 	return TC_PASS;
 }
 
