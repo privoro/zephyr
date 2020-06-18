@@ -25,11 +25,11 @@
 #define ADC_REFERENCE		ADC_REF_INTERNAL
 #define ADC_ACQUISITION_TIME	ADC_ACQ_TIME_DEFAULT
 #define ADC_1ST_CHANNEL_ID	26
-#define HW_TRIGGER_INTERVAL (50U)
+#define HW_TRIGGER_INTERVAL (2U)
 /* for DMA HW trigger interval need large than HW trigger interval*/
 #define SAMPLE_INTERVAL_US  (10000U)     
 
-#define BUFFER_SIZE  8
+#define BUFFER_SIZE  48
 static ZTEST_BMEM s32_t m_sample_buffer[BUFFER_SIZE];
 static ZTEST_BMEM s32_t m_sample_buffer2[2][BUFFER_SIZE];
 int    current_buf_inx = 0;
@@ -311,7 +311,7 @@ static int test_task_with_interval(void)
         s64_t milliseconds_spent;
 
 	const struct adc_sequence_options options = {
-		.interval_us     = 5000UL, /*make this the same as the sample time*/
+		.interval_us     = 500UL, /*make this double to sample time*/
 		.callback        = sample_with_interval_callback,
 		.extra_samplings = 1,
 	};
