@@ -29,7 +29,7 @@
 /* for DMA HW trigger interval need large than HW trigger interval*/
 #define SAMPLE_INTERVAL_US  (10000U)     
 
-#define BUFFER_SIZE  48
+#define BUFFER_SIZE  24
 static ZTEST_BMEM s32_t m_sample_buffer[BUFFER_SIZE];
 static ZTEST_BMEM s32_t m_sample_buffer2[2][BUFFER_SIZE];
 int    current_buf_inx = 0;
