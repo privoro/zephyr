@@ -273,6 +273,10 @@ static int mcux_adc16_init(struct device *dev)
 #else /* CONFIG_ADC_MCUX_ADC16_CLK_DIV_RATIO_8 */
 	adc_config.clockDivider = kADC16_ClockDivider8;
 #endif
+    //adc_config.clockSource = kADC16_ClockSourceAlt2;
+    adc_config.longSampleMode = kADC16_LongSampleCycle10;
+    adc_config.enableHighSpeed = true;
+    adc_config.enableContinuousConversion = true;
 
 	ADC16_Init(base, &adc_config);
 #if defined(FSL_FEATURE_ADC16_HAS_CALIBRATION) &&                              \
