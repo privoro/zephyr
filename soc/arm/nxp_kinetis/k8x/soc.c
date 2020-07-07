@@ -76,7 +76,8 @@ static ALWAYS_INLINE void clk_init(void)
 	CLOCK_InitOsc0(&osc_config);
 	CLOCK_SetXtal0Freq(CONFIG_OSC_XTAL0_FREQ);
 
-	CLOCK_BootToPeeMode(kMCG_OscselOsc, kMCG_PllClkSelPll0, &pll0_config);
+	//CLOCK_BootToPeeMode(kMCG_OscselOsc, kMCG_PllClkSelPll0, &pll0_config);
+	CLOCK_BootToPeeMode(kMCG_OscselIrc, kMCG_PllClkSelPll0, &pll0_config);
 
 	CLOCK_SetInternalRefClkConfig(kMCG_IrclkEnable, kMCG_IrcSlow,
 				      CONFIG_MCG_FCRDIV);
